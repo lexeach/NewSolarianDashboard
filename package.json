@@ -1,7 +1,6 @@
 {
   "name": "bcryptoweb3",
   "version": "0.1.0",
-  "homepage": "https://roi-dev.netlify.app",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.5",
@@ -23,7 +22,6 @@
     "react-scripts": "5.0.1",
     "react-select": "^5.7.0",
     "sass": "^1.56.1",
-    "serve": "^14.2.0",
     "stream": "^0.0.2",
     "stream-browserify": "^3.0.0",
     "url": "^0.11.0",
