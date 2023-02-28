@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Select from "react-select";
 import Web3 from "web3";
-import { ICU } from "../../utils/web3.js";
-import { baseUrl, ClientBaseURL } from "../../utils/confix";
+import { ICU, BEP20 } from "../../utils/web3.js";
+import { baseUrl } from "../../utils/confix";
 import Event from "./event";
 
 const customStyles = {
@@ -25,7 +25,7 @@ const customStyles = {
   },
 };
 
-const EventsList = () => {
+const BasicTable = () => {
   const web3 = new Web3(Web3.givenProvider || "http://localhost:7545");
   const [eventData, setEventData] = useState();
   const [totalCount, setTotalCount] = useState();
@@ -61,17 +61,16 @@ const EventsList = () => {
       setEventData(event);
     });
   }, []);
-
   // height
 
   async function eventList(data) {
     try {
-      // console.log("the api call data", data);
-      // console.log("the URL ..", `${baseUrl}/api/event?${data}`);
+      console.log("the api call data", data);
+      console.log("the URL ..", `${baseUrl}/api/event?${data}`);
       if (data) {
         let response = await axios.get(`${baseUrl}/api/event?${data}`);
 
-        // console.log("***** the respone", response);
+        console.log("***** the respone", response);
         return response;
       } else {
         let response = await axios.get(`${baseUrl}/api/event?`);
@@ -94,6 +93,9 @@ const EventsList = () => {
   const handleSubmit1 = async (event) => {
     event.preventDefault();
 
+    console.log("height", height);
+    console.log("search", search);
+
     if (type === undefined) {
       setType({ value: "name" });
       let data = `name=${search.data}`;
@@ -115,7 +117,10 @@ const EventsList = () => {
   };
 
   const nameOptionChange = (event) => {
+    console.log("form submited");
+    console.log("the evebt", event.value);
     let data = `name=${event.value}`;
+    console.log("data", data);
     eventList(data).then((res) => {
       let { event, totalCount } = res.data.body;
       setTotalCount(totalCount);
@@ -125,10 +130,13 @@ const EventsList = () => {
 
   const handleSubmitUserList = async (event) => {
     event.preventDefault();
+
     let user_list_data = readData.user_list;
     user_list_data = parseInt(user_list_data);
+    console.log("the usr list data", user_list_data);
     let ICU_ = new web3.eth.Contract(ICU.ABI, ICU.address);
     let userlist = await ICU_.methods.userList(user_list_data).call();
+    console.log("user list", userlist);
     setUserList(userlist);
   };
 
@@ -142,9 +150,6 @@ const EventsList = () => {
     const convert_income = web3.utils.fromWei(level_income, "ether");
     setLevelPrice(convert_income);
   };
-  function roundToFour(num) {
-    return +(Math.round(num + "e+4") + "e-4");
-  }
 
   const handleSubmitUser = async (event) => {
     event.preventDefault();
@@ -153,13 +158,11 @@ const EventsList = () => {
     let ICU_ = new web3.eth.Contract(ICU.ABI, ICU.address);
     let userDetail = await ICU_.methods.users(users_).call();
 
-    const income_ = web3.utils.fromWei(userDetail.income, "ether");
-
     setUsersAutoPoolPayReceived(userDetail.autoPoolPayReceived);
     setUsersAutopoolPayReciever(userDetail.autopoolPayReciever);
     setUsesBatchpaid(userDetail.batchPaid);
     setUsersId(userDetail.id);
-    setUsersIncome(roundToFour(income_));
+    setUsersIncome(userDetail.income);
     setUsersIsExist(userDetail.isExist);
     setUsersLevelIncomeReceived(userDetail.levelIncomeReceived);
     setUsersMIssedPoolPayment(userDetail.missedPoolPayment);
@@ -185,8 +188,26 @@ const EventsList = () => {
 
   return (
     <div className="custom-eventlist">
+      {/* <div className="page-header">
+        <h3 className="page-title">
+          Events :-{" "}
+          <span className="totalCount">( {totalCount ? totalCount : 0} )</span>{" "}
+        </h3>
+        <nav aria-label="breadcrumb">
+          <ol className="breadcrumb">
+            <li className="breadcrumb-item">
+              <a href="!#" onClick={(event) => event.preventDefault()}>
+                Event
+              </a>
+            </li>
+            <li className="breadcrumb-item active" aria-current="page">
+              List
+            </li>
+          </ol>
+        </nav>
+      </div> */}
       <div className="row">
-        <div className="col-lg-6 col-md-12 col-sm-12 grid-margin">
+        <div className="col-lg-6 col-md-6 col-sm-12 grid-margin">
           <div className="card">
             <div className="card-body">
               <h5>Check Wallet by ID </h5>
@@ -287,42 +308,39 @@ const EventsList = () => {
                   </div>
 
                   {users_autoPoolPayReceived ? (
-                    <div className="user-detail-res">
+                    <>
                       <div className="d-flex">
-                        <h4 className="heading_"> Auto Pool Pay Received :- </h4>
+                        <h4> Auto Pool Pay Recived :- </h4>
                         <h4> {users_autoPoolPayReceived}</h4>
                       </div>
                       <div className="d-flex">
-                        <h4 className="heading_"> Auto Pool Pay Receiver :- </h4>
+                        <h4> Auto Pool Pay Reciver :- </h4>
                         <h4> {users_autopoolPayReciever}</h4>
-                     
                       </div>
                       <div className="d-flex">
-                        <h4 className="heading_">My User ID :- </h4>{" "}
-                        <h4> {users_id}</h4>
+                        <h4> My User ID :- </h4> <h4> {users_id}</h4>
                       </div>
                       <div className="d-flex">
-                        <h4 className="heading_"> Total Income :- </h4>
+                        <h4> Total Income :- </h4>
                         <h4> {users_income}</h4>
                       </div>
-                      
                       <div className="d-flex">
-                        <h4 className="heading_"> Total Level Income :- </h4>
+                        <h4> Total Level Income :- </h4>
                         <h4> {users_levelIncomeReceived}</h4>
                       </div>
                       <div className="d-flex">
-                        <h4 className="heading_"> Missed Autopool Income :- </h4>
+                        <h4> Missed AutoPool Income :- </h4>
                         <h4> {users_missedPoolPayment}</h4>
                       </div>
                       <div className="d-flex">
-                        <h4 className="heading_"> Total Direct :- </h4>
+                        <h4> Total Direct :- </h4>
                         <h4> {users_referredUsers}</h4>
                       </div>
                       <div className="d-flex">
-                        <h4 className="heading_"> My Sponsor :- </h4>
+                        <h4> My sponsor :- </h4>
                         <h4> {users_referrerID}</h4>
                       </div>
-                    </div>
+                    </>
                   ) : (
                     0
                   )}
@@ -331,11 +349,12 @@ const EventsList = () => {
             </div>
           </div>
         </div>
-        {/* <div className="col-12 grid-margin stretch-card">
+        <div className="col-12 grid-margin stretch-card">
           <div className="card">
             <div className="card-body">
               <div className="d-flex justify-content-between">
                 <h4 className="card-title">Events</h4>
+                {/* <form  className="forms-sample"> */}
                 <div className="d-flex">
                   <form className="forms-sample" onSubmit={handleSubmit1}>
                     <div className="form-group d-flex event-custom-select">
@@ -423,10 +442,10 @@ const EventsList = () => {
               </div>
             </div>
           </div>
-        </div> */}
+        </div>
       </div>
     </div>
   );
 };
 
-export default EventsList;
+export default BasicTable;
